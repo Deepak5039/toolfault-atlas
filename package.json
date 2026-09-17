@@ -1,0 +1,21 @@
+{
+  "name": "toolfault-atlas",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Chaos engineering lab for testing how AI agents recover from unreliable tools.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check dist/app.js && node --check dist/simulator.mjs",
+    "serve": "python -m http.server 4173 -d dist"
+  },
+  "keywords": [
+    "genai",
+    "ai-agents",
+    "llm-evaluation",
+    "chaos-engineering",
+    "agent-reliability",
+    "observability"
+  ],
+  "license": "MIT"
+}

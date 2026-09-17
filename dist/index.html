@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07120e" />
+    <meta name="description" content="ToolFault Atlas is a chaos engineering lab for evaluating how AI agents recover from unreliable tools." />
+    <title>ToolFault Atlas — Agent Reliability Lab</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="grid-overlay" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="ToolFault Atlas home">
+        <span class="brand-symbol"><i></i><i></i><i></i></span>
+        <span>ToolFault <strong>Atlas</strong></span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#lab">Experiment lab</a>
+        <a href="#architecture">Architecture</a>
+      </nav>
+      <div class="live-badge"><span></span> Simulator ready</div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span>OPEN-SOURCE RELIABILITY LAB</span><span>v1.0</span></div>
+          <h1>Break the tools.<br /><em>Test the agent.</em></h1>
+          <p class="hero-lede">Inject production-style failures into an AI agent workflow. Replay every decision and measure whether recovery logic actually works.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#lab">Run an experiment <span>↓</span></a>
+            <button class="button ghost" id="loadHardMode" type="button">Load compound incident</button>
+          </div>
+          <div class="proof-row" aria-label="Project capabilities">
+            <div><strong>06</strong><span>fault<br />scenarios</span></div>
+            <div><strong>03</strong><span>recovery<br />strategies</span></div>
+            <div><strong>100%</strong><span>reproducible<br />runs</span></div>
+          </div>
+        </div>
+
+        <div class="hero-visual" aria-label="Animated tool-call reliability trace">
+          <div class="visual-header"><span>LIVE TRACE</span><span class="pulse-label"><i></i> fault proxy armed</span></div>
+          <div class="agent-node">
+            <span class="node-id">A</span>
+            <div><strong>Recovery agent</strong><small>adaptive · policy v3</small></div>
+            <span class="node-status">RUNNING</span>
+          </div>
+          <div class="tool-stack">
+            <div class="tool-node ok"><span>01</span><div><strong>customer_lookup</strong><small>112 ms · 200 OK</small></div><i>✓</i></div>
+            <div class="tool-node fault"><span>02</span><div><strong>order_api</strong><small>1,842 ms · TIMEOUT</small></div><i>!</i></div>
+            <div class="recovery-line"><span></span><b>retry + jitter</b><span></span></div>
+            <div class="tool-node recovered"><span>02</span><div><strong>order_api</strong><small>226 ms · RECOVERED</small></div><i>✓</i></div>
+            <div class="tool-node pending"><span>03</span><div><strong>policy_search</strong><small>queued</small></div><i>··</i></div>
+          </div>
+          <div class="visual-footer"><span>trace_84df</span><span>3 / 5 steps</span><span>2.18 s</span></div>
+        </div>
+      </section>
+
+      <section class="lab" id="lab" aria-labelledby="lab-title">
+        <div class="section-intro">
+          <div><span class="section-number">01</span><span class="kicker">EXPERIMENT LAB</span></div>
+          <h2 id="lab-title">Design an incident.<br />Watch the agent respond.</h2>
+          <p>The same seeded episodes run against a naive baseline and your selected recovery strategy, making every comparison reproducible.</p>
+        </div>
+
+        <div class="lab-shell">
+          <aside class="control-rail" aria-label="Experiment configuration">
+            <div class="control-heading"><span>CONFIGURATION</span><button id="resetConfig" type="button">Reset</button></div>
+
+            <fieldset>
+              <legend>01 · Failure scenario</legend>
+              <div class="scenario-list" id="scenarioList"></div>
+            </fieldset>
+
+            <fieldset>
+              <legend>02 · Recovery strategy</legend>
+              <div class="strategy-list" id="strategyList"></div>
+            </fieldset>
+
+            <div class="dual-controls">
+              <label>
+                <span>03 · Severity <output id="severityValue">3 / 5</output></span>
+                <input id="severityInput" type="range" min="1" max="5" value="3" />
+                <small><i>LOW</i><i>CRITICAL</i></small>
+              </label>
+              <label>
+                <span>04 · Episodes</span>
+                <select id="episodesInput">
+                  <option value="25">25 runs</option>
+                  <option value="50" selected>50 runs</option>
+                  <option value="100">100 runs</option>
+                  <option value="250">250 runs</option>
+                </select>
+              </label>
+            </div>
+
+            <button class="run-button" id="runExperiment" type="button"><span>Run chaos experiment</span><b>⌁</b></button>
+            <div class="seed-row"><span>Seed</span><code id="seedValue">2026</code><button id="newSeed" type="button" aria-label="Generate a new seed">↻</button></div>
+          </aside>
+
+          <div class="results-stage" aria-live="polite">
+            <div class="stage-toolbar">
+              <div><span class="status-dot"></span><span id="runStatus">LATEST RUN · COMPLETE</span></div>
+              <div>
+                <button id="copyLink" type="button">Copy setup</button>
+                <button id="exportReport" type="button">Export JSON ↓</button>
+              </div>
+            </div>
+
+            <div class="run-summary">
+              <div>
+                <span class="kicker" id="summaryScenario">TIMEOUT CASCADE</span>
+                <h3 id="summaryStrategy">Adaptive recovery</h3>
+                <p id="summaryDescription"></p>
+              </div>
+              <div class="verdict" id="verdictBlock"><span>VERDICT</span><strong id="verdictText">RESILIENT</strong></div>
+            </div>
+
+            <div class="metrics-grid" id="metricsGrid"></div>
+
+            <div class="analysis-grid">
+              <article class="panel comparison-panel">
+                <div class="panel-heading"><div><span class="kicker">CONTROL GROUP</span><h3>Strategy comparison</h3></div><span id="comparisonEpisodes">50 paired runs</span></div>
+                <div id="comparisonRows"></div>
+                <div class="comparison-note" id="comparisonNote"></div>
+              </article>
+
+              <article class="panel trace-panel">
+                <div class="panel-heading"><div><span class="kicker">REPRESENTATIVE EPISODE</span><h3>Decision trace</h3></div><span id="traceOutcome"></span></div>
+                <div class="trace-list" id="traceList"></div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="architecture" id="architecture" aria-labelledby="architecture-title">
+        <div class="section-intro compact">
+          <div><span class="section-number">02</span><span class="kicker">SYSTEM DESIGN</span></div>
+          <h2 id="architecture-title">Built to test behavior,<br />not decorate a chatbot.</h2>
+        </div>
+
+        <div class="architecture-map" aria-label="ToolFault Atlas system architecture">
+          <article><span class="map-index">01</span><div class="map-icon">DSL</div><h3>Scenario layer</h3><p>Describes target tools, fault type, probability, and severity with deterministic seeded sampling.</p><ul><li>6 incident presets</li><li>Compound faults</li><li>Reproducible seeds</li></ul></article>
+          <div class="map-arrow" aria-hidden="true">→</div>
+          <article><span class="map-index">02</span><div class="map-icon warning">FX</div><h3>Fault proxy</h3><p>Intercepts tool calls and returns realistic transport, contract, freshness, or side-effect failures.</p><ul><li>Timeout + 429</li><li>Schema + stale data</li><li>Partial writes</li></ul></article>
+          <div class="map-arrow" aria-hidden="true">→</div>
+          <article><span class="map-index">03</span><div class="map-icon">AG</div><h3>Agent strategies</h3><p>Runs naive, guarded, and adaptive policies through identical workflows and incident samples.</p><ul><li>Bounded retries</li><li>Validation + fallback</li><li>Write verification</li></ul></article>
+          <div class="map-arrow" aria-hidden="true">→</div>
+          <article><span class="map-index">04</span><div class="map-icon accent">EV</div><h3>Evaluation</h3><p>Aggregates traces into reliability metrics and preserves a representative replay for inspection.</p><ul><li>Success + recovery</li><li>Latency + efficiency</li><li>JSON evidence export</li></ul></article>
+        </div>
+
+        <div class="engineering-notes">
+          <div><span class="kicker">WHY IT MATTERS</span><p>Tool-using agents fail at system boundaries: unreliable APIs, ambiguous writes, stale retrieval, and silent contract changes. This lab makes those risks visible before production.</p></div>
+          <div><span class="kicker">PORTFOLIO SIGNAL</span><p>Demonstrates agent architecture, eval design, observability, fault modeling, deterministic testing, and product communication in one inspectable build.</p></div>
+          <div><span class="kicker">NEXT EXTENSION</span><p>Replace the simulated proxy with live HTTP interception and emit OpenTelemetry spans into a production trace backend.</p></div>
+        </div>
+
+        <footer>
+          <div class="brand"><span class="brand-symbol"><i></i><i></i><i></i></span><span>ToolFault <strong>Atlas</strong></span></div>
+          <p>Built as an open-source GenAI reliability portfolio project.</p>
+          <a href="#top">Back to top ↑</a>
+        </footer>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
